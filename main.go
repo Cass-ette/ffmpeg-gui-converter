@@ -1493,7 +1493,7 @@ func renderCommand(args []string) string {
 }
 
 func detectBinary(name string) string {
-	candidates := make([]string, 0, 6)
+	candidates := make([]string, 0, 10)
 	ext := ""
 	if runtime.GOOS == "windows" {
 		ext = ".exe"
@@ -1505,6 +1505,14 @@ func detectBinary(name string) string {
 			filepath.Join(exeDir, name+ext),
 			filepath.Join(exeDir, "bin", name+ext),
 		)
+		if runtime.GOOS == "darwin" {
+			if resourcesDir := macAppResourcesDir(exeDir); resourcesDir != "" {
+				candidates = append(candidates,
+					filepath.Join(resourcesDir, name+ext),
+					filepath.Join(resourcesDir, "bin", name+ext),
+				)
+			}
+		}
 	}
 
 	if wd, err := os.Getwd(); err == nil {
@@ -1529,6 +1537,17 @@ func detectBinary(name string) string {
 		}
 	}
 	return ""
+}
+
+func macAppResourcesDir(exeDir string) string {
+	if filepath.Base(exeDir) != "MacOS" {
+		return ""
+	}
+	contentsDir := filepath.Dir(exeDir)
+	if filepath.Base(contentsDir) != "Contents" {
+		return ""
+	}
+	return filepath.Join(contentsDir, "Resources")
 }
 
 func fileExists(path string) bool {

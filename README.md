@@ -2,7 +2,7 @@
 
 一个基于 `Go + Fyne + ffmpeg` 的本地图形界面转换器。
 
-现在的定位不再只是“单一转码器”，而是一个按功能分类整理的轻量媒体全能转换器。
+现在的定位不再只是“单一转码器”，而是一个按功能分类整理的轻量媒体全能转换器，并且更偏向“构建一次，双击就用”的桌面应用交付方式。
 
 目标很明确：
 
@@ -42,7 +42,7 @@
 - 实时进度
 - 实时日志
 - 转完后直接打开结果位置
-- 自动探测同目录或系统 `PATH` 中的 `ffmpeg` / `ffprobe`
+- 自动探测程序同目录、`bin/`、macOS `.app` 包内 `Contents/Resources/bin/`，以及系统 `PATH` 中的 `ffmpeg` / `ffprobe`
 
 ## 当前预设分类
 
@@ -84,7 +84,7 @@
 - `ffmpeg`
 - `ffprobe`
 
-如果只是给最终用户使用，后面可以直接构建出二进制，再把 `ffmpeg` 放到同目录一起分发。
+如果只是给最终用户使用，可以直接构建出二进制 / `.app`，再把 `ffmpeg` / `ffprobe` 一起分发。
 
 ## 运行
 
@@ -100,7 +100,9 @@ go run .
 ./run.command
 ```
 
-### 构建本地二进制
+如果已经打过包，它会优先打开已有的 `.app` 或本地二进制。
+
+### 构建当前机器的开发二进制
 
 ```bash
 ./build.command
@@ -112,7 +114,66 @@ go run .
 bin/ffmpeg-gui-converter
 ```
 
-Windows 下可用：
+### 打包 macOS `.app`
+
+```bash
+./package-mac-app.command
+```
+
+输出目录：
+
+```text
+dist/macos/FFmpeg GUI Converter.app
+```
+
+如果系统里已经能找到 `ffmpeg` / `ffprobe`，打包脚本会自动把它们复制进 `.app/Contents/Resources/bin/`。
+
+想直接安装到“应用程序”目录可执行：
+
+```bash
+./install-mac-app.command
+```
+
+默认安装到：
+
+```text
+/Applications/FFmpeg GUI Converter.app
+```
+
+### 构建 Windows GUI `.exe`
+
+在 Windows 机器上：
+
+```bat
+build-windows.bat
+```
+
+如果你在 macOS / Linux 上交叉编译：
+
+```bash
+./build-windows.command
+```
+
+这个脚本需要 `mingw-w64` 或 `zig` 作为 Windows 交叉编译工具链。
+
+输出目录：
+
+```text
+dist/windows/ffmpeg-gui-converter/
+├── ffmpeg-gui-converter.exe
+├── README.txt
+└── bin/
+```
+
+给最终用户分发时，推荐把 `ffmpeg.exe` 和 `ffprobe.exe` 放到：
+
+```text
+dist/windows/ffmpeg-gui-converter/bin/
+```
+
+或者直接与 `ffmpeg-gui-converter.exe` 放在同一目录。
+
+### Windows 本地双击启动
 
 ```bat
 run.bat
@@ -134,16 +195,51 @@ brew install ffmpeg
 
 安装 FFmpeg 后，把 `ffmpeg.exe` 和 `ffprobe.exe` 放进 `PATH`，或者放到程序同目录。
 
+## 推荐分发方式
+
+### macOS
+
+- 构建 `dist/macos/FFmpeg GUI Converter.app`
+- 把 `.app` 拖进“应用程序”
+- 如果要免安装依赖，确保 `.app/Contents/Resources/bin/` 里有 `ffmpeg` 和 `ffprobe`
+
+### Windows
+
+- 分发整个 `dist/windows/ffmpeg-gui-converter/` 目录
+- 让用户直接双击 `ffmpeg-gui-converter.exe`
+- 把 `ffmpeg.exe` 和 `ffprobe.exe` 放在同目录或 `bin/` 目录
+
+## 关于 macOS 打开方式
+
+- 本地自己构建的 `.app`，通常可以直接从“应用程序”中打开
+- 如果后面要把应用发给别人下载，未签名 / 未公证的 `.app` 仍可能被 Gatekeeper 提示
+- 真正面向外部分发时，建议再补应用图标、签名和 notarization
+
 ## 目录结构
 
 ```text
 ffmpeg-gui-converter/
+├── assets/
+│   └── macos/
+│       ├── app-icon-source.png
+│       ├── AppIcon-1024.png
+│       └── AppIcon.icns
 ├── main.go
 ├── go.mod
 ├── go.sum
 ├── build.command
+├── package-mac-app.command
+├── install-mac-app.command
+├── build-windows.command
+├── build-windows.bat
 ├── run.command
 ├── run.bat
+├── packaging/
+│   ├── macos/
+│   │   ├── Info.plist
+│   │   └── make_app_icon.py
+│   └── windows/
+│       └── README.txt
 └── README.md
 ```
 
@@ -156,5 +252,5 @@ ffmpeg-gui-converter/
 - 字幕烧录
 - GPU 编码预设
 - 记住上次使用的配置
-- 打包 macOS `.app`
-- 打包 Windows `.exe`
+- 应用图标
+- macOS / Windows 签名与正式发行包
