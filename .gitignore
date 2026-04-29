@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.DS_Store
+bin/
+ffmpeg-gui-converter
+ffmpeg-gui-converter.exe
