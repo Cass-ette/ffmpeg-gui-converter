@@ -30,7 +30,8 @@ const (
 	defaultPresetKey     = "h264_mp4"
 	categoryVideo        = "视频转码"
 	categoryAudio        = "音频转码"
-	categoryTool         = "提取与封装"
+	categoryAudioExtract = "视频提取音频"
+	categoryTool         = "视频封装"
 	defaultResolution    = "保持原始"
 	defaultFrameMode     = "补边适配目标画幅（推荐）"
 	defaultWindowWidth   = 1040
@@ -278,8 +279,8 @@ var presets = []Preset{
 	},
 	{
 		Key:       "extract_mp3",
-		Category:  categoryTool,
-		Label:     "MP3 / 音轨提取",
+		Category:  categoryAudioExtract,
+		Label:     "MP3 / 提取视频音轨",
 		Summary:   "从视频里抽出音轨并转成 MP3，适合课程、播客、访谈。",
 		Extension: "mp3",
 		Args:      []string{"-vn", "-c:a", "libmp3lame", "-q:a", "2"},
@@ -287,8 +288,8 @@ var presets = []Preset{
 	},
 	{
 		Key:       "extract_wav",
-		Category:  categoryTool,
-		Label:     "WAV / 音轨提取",
+		Category:  categoryAudioExtract,
+		Label:     "WAV / 提取视频音轨",
 		Summary:   "从视频里抽出无损音轨，适合后续剪辑和音频处理。",
 		Extension: "wav",
 		Args:      []string{"-vn", "-c:a", "pcm_s16le"},
@@ -504,7 +505,7 @@ func (ui *ConverterUI) buildContent() fyne.CanvasObject {
 	}
 
 	headerTitle := widget.NewLabelWithStyle(appTitle, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	headerSubtitle := widget.NewLabel("按分类整理的视频、音频、提取与封装转换器。优先查找程序同目录下的 ffmpeg / ffprobe，其次回退系统 PATH。")
+	headerSubtitle := widget.NewLabel("视频转码 · 音频转码 · 视频提取音频 · 视频封装。优先查找程序同目录下的 ffmpeg / ffprobe，其次回退系统 PATH。")
 	headerSubtitle.Wrapping = fyne.TextWrapWord
 	header := widget.NewCard("", "", container.NewVBox(headerTitle, headerSubtitle))
 
